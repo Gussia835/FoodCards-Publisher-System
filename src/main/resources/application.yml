@@ -1,0 +1,41 @@
+server:
+  port: 666
+  ssl:
+    enabled: false
+
+grpc:
+  server:
+    port: 6666
+    security:
+      enabled: false
+
+receiver:
+  datasource:
+    pom:
+      url: jdbc:postgresql://pom_db:5432/pom_db
+      username: pom
+      password: ${POSTGRES_PASSWORD}
+      driver-class-name: org.postgresql.Driver
+    gru:
+      url: jdbc:oracle:thin:@gru_db:1521/XEPDB1
+      username: GRU
+      password: ${GRU_APP_PASSWORD}
+      driver-class-name: oracle.jdbc.OracleDriver
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+scheduler:
+  scan:
+    frequency: 10000
+  cleanup:
+    start: "0 0 2 * * ?"
+    lifespan: 30
+
+app:
+  filespaths:
+    process-dir: /app/incoming
+    target-dir: /app/target

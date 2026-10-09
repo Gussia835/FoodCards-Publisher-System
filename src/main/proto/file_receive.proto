@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package org.example.grpc;
+
+option java_multiple_files = true;
+option java_package = "org.example.grpc.proto";
+
+
+message FileChunk {
+    string filename = 1;
+
+
+    bytes data = 2;
+    bool is_last = 3;
+    int64 offset = 4;
+
+    map<string, string> metadata = 5;
+
+}
+
+message ResponseGRPC {
+    string status = 1;
+    string filename = 2;
+    int64 total_bytes = 3;
+
+    string message = 4;
+
+}
+
+service GrpcService {
+    rpc Upload(stream FileChunk) returns (ResponseGRPC);
+}
+
+

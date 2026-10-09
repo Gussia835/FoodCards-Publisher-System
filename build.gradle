@@ -1,0 +1,112 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.google.protobuf' version '0.9.4'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+    integrationTestAnnotationProcessor.extendsFrom annotationProcessor
+}
+
+dependencies {
+    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.23.0.0'
+    implementation group: 'com.oracle.database.nls', name: 'orai18n', version: '23.2.0.0'
+    implementation 'org.postgresql:postgresql:42.7.13'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.apache.tika:tika-core:2.9.2'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'net.datafaker:datafaker:2.7.0'
+    implementation 'net.devh:grpc-server-spring-boot-starter:3.0.0.RELEASE'
+    implementation 'io.grpc:grpc-netty-shaded:1.60.0'
+    implementation 'com.google.protobuf:protobuf-java:3.25.1'
+
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'io.rest-assured:rest-assured:5.3.2'
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation 'org.testcontainers:postgresql:1.19.3'
+    testImplementation 'org.testcontainers:oracle-xe:1.19.3'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+}
+
+
+sourceSets {
+    test {
+        java { srcDir 'src/test/java' }
+        resources { srcDir 'src/test/resources' }
+    }
+
+    integrationTest {
+        java { srcDir 'src/integrationTest/java' }
+        resources { srcDir 'src/integrationTest/resources' }
+
+
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+
+    mustRunAfter test
+}
+
+test {
+    useJUnitPlatform()
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.25.1'
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.60.0'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+tasks.named('processIntegrationTestResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+check.dependsOn integrationTest
