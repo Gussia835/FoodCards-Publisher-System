@@ -8,11 +8,18 @@ COPY src ./src
 RUN chmod +x gradlew
 RUN ./gradlew bootJar --no-daemon
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-COPY --from=builder /app/build/libs/Receiver-1.0-SNAPSHOT.jar app.jar
+RUN mkdir -p /app/config /app/logs /app/incoming /app/target
+
+COPY --from=builder /app/build/libs/Publisher-1.0-SNAPSHOT.jar app.jar
 
 EXPOSE 666 6666
 
-CMD ["java", "-jar", "app.jar"]
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+
+ENTRYPOINT ["java", \
+            "-Dfile.encoding=UTF-8", \
+            "-Dspring.config.additional-location=optional:file:/app/config/application.yml", \
+            "-jar", "app.jar"]
