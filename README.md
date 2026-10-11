@@ -167,7 +167,7 @@ publisher-change-food-card/
 3. Запуск с внешними конфигами (для prod-среды)
 ```bash
 java -Dlogging.config=./config/logback-spring.xml \
-     -jar build/libs/publisher-change-food-card-1.0-SNAPSHOT.jar \
+     -jar build/libs/Publisher-1.0-SNAPSHOT.jar \
      --spring.config.location=file:./config/application.yml
 ```
 
